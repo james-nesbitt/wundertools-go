@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+# Get rid of existing binary
+rm -f "${WUNDERTOOLS_INSTALL_PATH}"
+
+cp "${WUNDERTOOLS_BUILD_BINARY_PATH}" "${WUNDERTOOLS_INSTALL_PATH}"
