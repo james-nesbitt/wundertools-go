@@ -27,28 +27,36 @@ type Operation interface {
 	// Run a validation check on the Operation
 	Validate() bool
 
-	// What settings/values does the Operation provide to an implemenentor
-	Properties() *Properties
-
-	// Execute the Operation
-	Exec() Result
+	/**
+	 * What settings/values does the Operation provide to an implemenentor
+	 *
+	 * Consider these defaults, and a definition of what Property vals are
+	 * valid for the Exec() method.  Exec() is expected to discard Properties
+	 * that don't make sense.
+	 * Take these, to know what to pass to the Exec handler.
+	 *  - run Listen() on any properties that you intend to read during Exec()
+	 *  - Set() any values that you want passed into Exec()
+	 */
+	Properties() Properties
 
 	/**
+	 * Execute the Operation
+	 *
+	 * Pass in any properties that will not be default, or to which 
+	 * you are listening.  The Result return can give channels used
+	 * to mark when the operation is complete, and to retrieve 
+	 * exec status.
+	 * This method is expected to be thread safe, and to be runnable
+	 * concurrently with different Property values.
+	 *
+	 * The operation should not be run as a subroutine, it should
+	 * run it's own subroutine internall, and return a Result object
+	 * which can be used to track the status.
+	 * Properties should be set in the Exec subroutine, as Property
+	 * objects are epected to have threadsafe Set() handlers.
+	 */
+	Exec(properties *Properties) Result
 
-	// OPERATIONAL
-
-	Exec()
-
-	// Operational status of the operation
-	Status() (chan int)
-
-	// Trigger for operation failure
-	Fail() (chan bool)
-
-	// Error list
-	Errors() []error
-
-	*/
 }
 
 // Operations are a keyed map of individual Operations

@@ -52,7 +52,7 @@ func (property *BaseProperty) Internal() bool {
 
 // A base Property that provides a String value
 type StringProperty struct {
-	value string
+	value chan string
 }
 
 // Give an idea of what type of value the property consumes
@@ -60,12 +60,35 @@ func (property *StringProperty) Type() string {
 	return "string"
 }
 
+func (property *StringProperty) Listen() <-chan int, error {
+	if property.listening {
+		return nil, errors.New("Property already being listened to.")
+	}
+
+	property.listening = true
+
+	property.transition = make(chan string)
+	property.counter = make(chan int)
+
+	go func() {
+			for value := range transition {
+				property.value = property.transition
+				property.counter++
+			}
+			property.listening = false
+		}()
+}
+func (property *StringProperty) Close() {
+	close(property.transition)
+	close(property.counter)
+}
+
 func (property *StringProperty) Get() interface{} {
-	return interface{}(property.value)
+	return interface{}(<- property.value)
 }
 func (property *StringProperty) Set(value interface{}) bool {
 	if converted, ok := value.(string); ok {
-		property.value = converted
+		go property.transition <- converted
 		return true
 	} else {
 		log.WithFields(log.Fields{"value": value}).Error("Could not assign Property value, because the passed parameter was the wrong type. Expected string")

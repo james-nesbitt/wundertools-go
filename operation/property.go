@@ -31,6 +31,9 @@ type Property interface {
 	// Give an idea of what type of value the property consumes
 	Type() string
 
+	// Mark this property is "being listened to". The channel will increment on every set
+	Listen() chan int
+
 	// Value allows the retrieval and setting of unknown Typed values for the property.
 	Get() interface{}
 	Set(interface{}) bool
